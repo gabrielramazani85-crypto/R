@@ -1,30 +1,52 @@
-# Improved Error Handling, Data Validation, and Code Refactoring in app.py
+import streamlit as st
+import pandas as pd
+import datetime
 
-import json
-from flask import Flask, request, jsonify
+# Helper functions
 
-app = Flask(__name__)
-
-# Improved Route Example
-@app.route('/data', methods=['POST'])
-def handle_data():
+def load_data():
     try:
-        # Validate incoming JSON data
-        data = request.get_json()
-        if not data or 'key' not in data:
-            return jsonify({'error': 'Invalid input: Missing key'}), 400
-
-        # Process data
-        result = process_data(data['key'])
-        return jsonify({'result': result}), 200
+        return pd.read_csv('data.csv')
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        st.error(f'Error loading data: {e}')
+        return pd.DataFrame()  # Return an empty DataFrame in case of error
 
-# Example data processing function
 
-def process_data(key):
-    # Add logic here
-    return f'Processed {key}'
+def validate_order(order):
+    valid = True
+    if not order.get('item_name') or not isinstance(order['quantity'], int):
+        valid = False
+        st.warning('Invalid order data. Please check your input.')
+    return valid
+
+# Main app
+
+def main():
+    st.title('Restaurant Management System')
+
+    # Load initial data
+    data = load_data()
+    orders = []
+
+    # Order submission form
+    with st.form(key='order_form'):
+        item_name = st.text_input('Item Name')
+        quantity = st.number_input('Quantity', min_value=1)
+        submit_button = st.submit_button(label='Submit')
+
+        if submit_button:
+            order = {'item_name': item_name, 'quantity': quantity}
+            if validate_order(order):
+                timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                order['timestamp'] = timestamp
+                orders.append(order)
+                st.success(f'Order submitted successfully at {timestamp}!')
+
+    # Display orders
+    if orders:
+        st.subheader('Orders')
+        for order in orders:
+            st.write(f"Item: {order['item_name']}, Quantity: {order['quantity']}, Time: {order['timestamp']}")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    main()
