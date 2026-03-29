@@ -1,4 +1,4 @@
-'import streamlit as st
+import streamlit as st
 import sqlite3
 from streamlit_autorefresh import st_autorefresh   # auto-refresh correct
 
@@ -148,4 +148,4 @@ elif page == "Statistiques":
     st.subheader("📈 Historique des commandes")
     commandes = c.execute("SELECT id, plat, quantite, statut, paiement FROM commandes ORDER BY id DESC LIMIT 10").fetchall()
     for cmd in commandes:
-        st.write(f"{cmd[0]} - {cmd[1]} x{cmd[2]} | Statut : {cmd[3]} | Paiement : {cmd[4]}")'
+        st.write(f"{cmd[0]} - {cmd[1]} x{cmd[2]} | Statut : {cmd[3]} | Paiement : {cmd[4]}")
